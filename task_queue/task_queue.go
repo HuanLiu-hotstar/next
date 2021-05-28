@@ -60,8 +60,7 @@ func (t *TaskQueue) TryEnqueue(f Func) bool {
 func (t *TaskQueue) start() {
 	for i := 0; i < t.config.WorkerCount; i++ {
 		go func() {
-			for {
-				f := <-t.queue
+			for f := range t.queue {
 				f()
 			}
 		}()
