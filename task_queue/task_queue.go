@@ -40,10 +40,12 @@ func (t *TaskQueue) Enqueue(f Func) {
 }
 
 func (t *TaskQueue) EnqueueTimeout(timeout time.Duration, f Func) bool {
+	d := time.NewTimer(timeout)
+	defer d.Stop()
 	select {
 	case t.queue <- f:
 		return true
-	case <-time.After(timeout):
+	case <-d.C:
 		return false
 	}
 }
