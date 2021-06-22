@@ -62,14 +62,14 @@ func main() {
 	}
 
 	// initiate a call to some_func
-	addrServ := "127.0.0.1:8081"
+	addrServ := "127.0.0.1:8080"
 	url := fmt.Sprintf("http://%s/list", addrServ)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Fatalf("unable to create http request: %+v\n", err)
 	}
 
-	res, err := client.DoWithAppSpan(req, "list")
+	res, err := client.DoWithAppSpan(req, "client-list")
 	if err != nil {
 		log.Fatalf("unable to do http request: %+v\n", err)
 	}
