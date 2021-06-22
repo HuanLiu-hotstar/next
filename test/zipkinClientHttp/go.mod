@@ -1,4 +1,4 @@
-module zipkinClientHttp
+module github.com/HuanLiu-hotstar/next/test/zipkinClientHttp
 
 go 1.16
 
