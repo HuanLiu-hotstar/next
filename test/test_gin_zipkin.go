@@ -2,19 +2,20 @@ package main
 
 import (
 	// "os"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
-	"contrib.go.opencensus.io/exporter/zipkin"
+	// "contrib.go.opencensus.io/exporter/zipkin"
 	"github.com/gin-gonic/gin"
 	"github.com/opentracing/opentracing-go"
 	openzipkin "github.com/openzipkin/zipkin-go"
-	"go.opencensus.io/plugin/ochttp"
-	"go.opencensus.io/stats/view"
+	// "go.opencensus.io/plugin/ochttp"
+	// "go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	// zipkin middleware
-	//zipkinmw "github.com/openzipkin/zipkin-go/middleware/http"
+	zipkinmw "github.com/openzipkin/zipkin-go/middleware/http"
 	"github.com/openzipkin/zipkin-go/reporter"
 	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
 )
@@ -48,9 +49,13 @@ func Init(opt ...ConfigOpt) func(c *gin.Context) {
 		log.Fatalf("unable to create local endpoint:%s  %+v\n", c.LocalAddr, err)
 	}
 	r.reporter = zipkinHTTP.NewReporter("http://localhost:9411/api/v2/spans")
-	exporter := zipkin.NewExporter(r.reporter, endpoint)
-	trace.RegisterExporter(exporter)
-	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+	//exporter := zipkin.NewExporter(r.reporter, endpoint)
+	r.tracer, err = openzipkin.NewTracer(r.reporter, openzipkin.WithLocalEndpoint(endpoint))
+	if err != nil {
+		panic(fmt.Sprintf("err:%s", err))
+	}
+	//trace.RegisterExporter(exporter)
+	//trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 	return nil
 	// return ZipKinMiddleware
 }
@@ -73,17 +78,18 @@ func dohttp(c *gin.Context) {
 }
 func main() {
 
-	//zipkinMiddle := Init()
 	Init()
 	defer Destroy()
-	// spanName := "test-svr"
-
-	// f := func(c *gin.Context) {
-	// 	c.Next()
-	// }
+	spanName := "test-svr"
 	rgin := gin.Default()
 	// 第三步: 添加一个 middleWare, 为每一个请求添加span
-	// r.Use(zipkinMiddle)
+
+	middler := zipkinmw.NewServerMiddleware(
+		r.tracer,
+		zipkinmw.SpanName(spanName),
+		zipkinmw.TagResponseSize(true),
+	)
+	//rgin.Use(gin.WrapH(middler))
 	rgin.GET("/",
 		func(c *gin.Context) {
 			time.Sleep(500 * time.Millisecond)
@@ -95,18 +101,17 @@ func main() {
 			dohttp(c)
 			c.JSON(200, gin.H{"code": 200, "msg": "OK2"})
 		})
-	// r.Run(":8080")
-	// handler := zipkinmw.NewServerMiddleware(
-	// 	r.tracer,
-	// 	zipkinmw.SpanName(spanName),
-	// 	zipkinmw.TagResponseSize(true),
-	// 	// mw.ServerTags(tags),
-	// )(rgin)
-	h := &ochttp.Handler{Handler: rgin}
-	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
-		log.Fatal("Failed to register ochttp.DefaultServerViews")
-	}
-	http.Handle("/", h)
-	port := ":8080"
-	http.ListenAndServe(port, nil)
+	http.ListenAndServe(":8080", middler(rgin))
+	//rgin.Run(":8080")
+	// spanName := "http"
+
+	// handler := &ochttp.Handler{Handler: rgin}
+	// if err := view.Register(ochttp.DefaultServerViews...); err != nil {
+	// 	log.Fatal("Failed to register ochttp.DefaultServerViews")
+	// }
+	// http.Handle("/", handler)
+	// port := ":8080"
+	// if err := http.ListenAndServe(port, nil); err != nil {
+	// 	log.Fatal("err:%s", err)
+	// }
 }
