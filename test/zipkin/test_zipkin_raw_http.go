@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
@@ -60,9 +61,9 @@ func list(w http.ResponseWriter, r *http.Request) {
 }
 
 func database(r *http.Request) {
-	cache(r)
 	span, _ := tracer.StartSpanFromContext(r.Context(), "database")
 	defer span.Finish()
+	cache(r)
 	x := rand.Intn(4) + 100
 	time.Sleep(time.Duration(x) * time.Millisecond)
 	span.Tag("sleep-time", fmt.Sprintf("database-cost:%d", x))
@@ -77,14 +78,17 @@ func cache(r *http.Request) {
 }
 
 func serviceb(r *http.Request) {
-	span, _ := tracer.StartSpanFromContext(r.Context(), "serviceb")
+	span, pc := tracer.StartSpanFromContext(r.Context(), "serviceb")
 	defer span.Finish()
 	time.Sleep(time.Duration(rand.Intn(100)+100) * time.Millisecond)
-	servicec(r)
+	servicec(pc) // servicec is childof serviceb
+	span.Annotate(time.Now(), "endtime")
 }
 
-func servicec(r *http.Request) {
-	span, _ := tracer.StartSpanFromContext(r.Context(), "servicec")
+//func servicec(r *http.Request) {
+func servicec(c context.Context) {
+	span, _ := tracer.StartSpanFromContext(c, "servicec")
 	defer span.Finish()
 	time.Sleep(time.Duration(rand.Intn(700)+100) * time.Millisecond)
+	span.Tag("servicec", "C") // set tags for search servicec
 }
