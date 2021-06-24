@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -34,6 +35,7 @@ func main() {
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/list", list)
+	mux.HandleFunc("/client", client)
 	spanName := "root"
 	middler := zipkinmw.NewServerMiddleware(
 		tracer,
@@ -48,11 +50,15 @@ func main() {
 
 }
 
+func client(w http.ResponseWriter, r *http.Request) {
+	span, _ := tracer.StartSpanFromContext(r.Context(), r.URL.Path)
+	defer span.Finish()
+	w.Write([]byte("hello client"))
+}
 func list(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Serving request: %s", r.URL.Path)
 	span, _ := tracer.StartSpanFromContext(r.Context(), r.URL.Path)
 	defer span.Finish()
-	//time.Sleep(6 * time.Second)
 	database(r)
 	serviceb(r)
 	res := strings.Repeat("o", rand.Intn(100)+1)
@@ -87,8 +93,39 @@ func serviceb(r *http.Request) {
 
 //func servicec(r *http.Request) {
 func servicec(c context.Context) {
-	span, _ := tracer.StartSpanFromContext(c, "servicec")
+	span, ctx := tracer.StartSpanFromContext(c, "servicec")
 	defer span.Finish()
 	time.Sleep(time.Duration(rand.Intn(700)+100) * time.Millisecond)
 	span.Tag("servicec", "C") // set tags for search servicec
+	doclient(ctx)
+}
+
+func doclient(c context.Context) {
+	span, _ := tracer.StartSpanFromContext(c, "doclient")
+	defer span.Finish()
+
+	// initiate a call to some_func
+	addrServ := "127.0.0.1:8080"
+	url := fmt.Sprintf("http://%s/client", addrServ)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatalf("unable to create http request: %+v\n", err)
+	}
+	req = req.WithContext(c)
+	client, err := zipkinmw.NewClient(tracer, zipkinmw.ClientTrace(true), zipkinmw.ClientTags(map[string]string{"type:": "from-raw-http-client"}))
+	if err != nil {
+		log.Fatalf("err NewClient %s", err)
+	}
+	res, err := client.DoWithAppSpan(req, "other_svr_client")
+	if err != nil {
+		log.Fatalf("unable to do http request: %+v\n", err)
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Fatalf("err read body %s", err)
+	}
+
+	// Output:
+	log.Printf("result %s", body)
 }
