@@ -53,6 +53,8 @@ func main() {
 func client(w http.ResponseWriter, r *http.Request) {
 	span, _ := tracer.StartSpanFromContext(r.Context(), r.URL.Path)
 	defer span.Finish()
+	x := rand.Intn(50) + 30
+	time.Sleep(time.Duration(x) * time.Millisecond)
 	w.Write([]byte("hello client"))
 }
 func list(w http.ResponseWriter, r *http.Request) {
@@ -101,8 +103,8 @@ func servicec(c context.Context) {
 }
 
 func doclient(c context.Context) {
-	span, _ := tracer.StartSpanFromContext(c, "doclient")
-	defer span.Finish()
+	// span, _ := tracer.StartSpanFromContext(c, "doclient")
+	// defer span.Finish()
 
 	// initiate a call to some_func
 	addrServ := "127.0.0.1:8080"
