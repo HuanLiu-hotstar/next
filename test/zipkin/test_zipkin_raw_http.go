@@ -113,7 +113,7 @@ func doclient(c context.Context) {
 	if err != nil {
 		log.Fatalf("unable to create http request: %+v\n", err)
 	}
-	req = req.WithContext(c)
+	req = req.WithContext(c) // use parent context
 	client, err := zipkinmw.NewClient(tracer, zipkinmw.ClientTrace(true), zipkinmw.ClientTags(map[string]string{"type:": "from-raw-http-client"}))
 	if err != nil {
 		log.Fatalf("err NewClient %s", err)
