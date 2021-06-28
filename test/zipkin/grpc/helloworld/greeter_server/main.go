@@ -83,7 +83,8 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	middleware := grpc.StatsHandler(zipkingrpc.NewServerHandler(tracer))
+	m := map[string]string{"key": "value"}
+	middleware := grpc.StatsHandler(zipkingrpc.NewServerHandler(tracer, zipkingrpc.ServerTags(m)))
 
 	s := grpc.NewServer(middleware)
 	pb.RegisterGreeterServer(s, &server{})

@@ -30,7 +30,7 @@ import (
 	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 
 	openzipkin "github.com/openzipkin/zipkin-go"
-	// zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
+	zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
 	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
 )
 
@@ -58,7 +58,7 @@ func newTracer() *openzipkin.Tracer {
 func main() {
 	newTracer()
 	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, grpc.WithStatsHandler(zipkingrpc.NewClientHandler(tracer)))
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithStatsHandler(zipkingrpc.NewClientHandler(tracer)))
 	// conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -71,6 +71,7 @@ func main() {
 	if len(os.Args) > 1 {
 		name = os.Args[1]
 	}
+	// doclient(c, name)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
@@ -78,4 +79,17 @@ func main() {
 		log.Fatalf("could not greet: %v", err)
 	}
 	log.Printf("Greeting: %s", r.GetMessage())
+}
+
+func doclient(c pb.GreeterClient, name string) {
+	span := tracer.StartSpan("client")
+	defer span.Finish()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
+	if err != nil {
+		log.Fatalf("could not greet: %v", err)
+	}
+	log.Printf("Greeting: %s", r.GetMessage())
+
 }
