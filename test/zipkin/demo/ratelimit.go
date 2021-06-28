@@ -1,13 +1,13 @@
 package main
 
 import (
-	"context"
+	// "context"
 	"fmt"
-	"io/ioutil"
+	// "io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
-	"strings"
+	// "strings"
 	"time"
 
 	openzipkin "github.com/openzipkin/zipkin-go"
@@ -21,7 +21,7 @@ var (
 
 func main() {
 
-	localEndpoint, err := openzipkin.NewEndpoint("pc", "192.168.1.61:8082")
+	localEndpoint, err := openzipkin.NewEndpoint("ratelimit", "192.168.1.61:8082")
 	if err != nil {
 		log.Fatalf("Failed to create Zipkin exporter: %v", err)
 	}
@@ -39,25 +39,24 @@ func main() {
 		panic(fmt.Sprintf("err:%s", err))
 	}
 	mux := http.NewServeMux()
-	mux.HandleFunc("/pc", pc)
+	mux.HandleFunc("/ratelimit", ratelimit)
 	// spanName := "root"
 	middler := zipkinmw.NewServerMiddleware(
 		tracer,
-		// zipkinmw.SpanName(spanName),
+		zipkinmw.SpanName("ratelimit"),
 		zipkinmw.TagResponseSize(true),
 	)
 
 	h := middler(mux)
-	port := ":8080"
+	port := ":8082"
 	log.Printf("Server listening! %s ...", port)
 	log.Fatal(http.ListenAndServe(port, h))
 
 }
-func pc(w http.ResponseWriter, r *http.Request) {
+func ratelimit(w http.ResponseWriter, r *http.Request) {
 	span, _ := tracer.StartSpanFromContext(r.Context(), r.URL.Path)
 	defer span.Finish()
-	//call auth
-	//call rate limit
-	//call pc
-	//w.Write([]byte("hello client"))
+	x := rand.Intn(100) + 100
+	time.Sleep(time.Duration(x) * time.Millisecond)
+	w.Write([]byte("hello ratelimit client"))
 }

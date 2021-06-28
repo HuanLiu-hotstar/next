@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	// "strings"
-	// "time"
+	"time"
 
 	openzipkin "github.com/openzipkin/zipkin-go"
 	zipkinmw "github.com/openzipkin/zipkin-go/middleware/http"
@@ -17,9 +17,9 @@ import (
 
 var (
 	tracer     *openzipkin.Tracer
-	serverName = "UM"
+	serverName = "UM-Server"
 	localAddr  = "192.168.1.61"
-	port       = 8081
+	port       = 8084
 )
 
 func main() {
@@ -40,7 +40,7 @@ func main() {
 	// spanName := "root"
 	middler := zipkinmw.NewServerMiddleware(
 		tracer,
-		// zipkinmw.SpanName(spanName),
+		zipkinmw.SpanName(serverName),
 		zipkinmw.TagResponseSize(true),
 	)
 
@@ -53,5 +53,6 @@ func um(w http.ResponseWriter, r *http.Request) {
 	span, _ := tracer.StartSpanFromContext(r.Context(), r.URL.Path)
 	defer span.Finish()
 	x := rand.Intn(100) + 10
+	time.Sleep(time.Duration(x) * time.Millisecond)
 	w.Write([]byte(fmt.Sprintf(`{"um":%d}`, x)))
 }

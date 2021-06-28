@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "context"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -17,10 +17,10 @@ import (
 
 var (
 	tracer     *openzipkin.Tracer
-	serverName = "PC"
+	serverName = "PC-Server"
 	localAddr  = "192.168.1.63"
 	port       = 8083
-	umaddr     = "192.168.1.61:61"
+	umAddr     = "http://localhost:8084/um"
 )
 
 func main() {
@@ -41,7 +41,7 @@ func main() {
 	// spanName := "root"
 	middler := zipkinmw.NewServerMiddleware(
 		tracer,
-		// zipkinmw.SpanName(spanName),
+		zipkinmw.SpanName(serverName),
 		zipkinmw.TagResponseSize(true),
 	)
 
@@ -51,37 +51,50 @@ func main() {
 
 }
 func pc(w http.ResponseWriter, r *http.Request) {
-	span, _ := tracer.StartSpanFromContext(r.Context(), r.URL.Path)
+	span, ctx := tracer.StartSpanFromContext(r.Context(), r.URL.Path)
 	defer span.Finish()
-	doclient(r)
+	callum(ctx)
+	//span.Annotate(time.Now(), "some-work")
 	x := rand.Intn(100) + 10
+	//time.Sleep(time.Duration(x) * time.Millisecond)
+	otherwork(ctx)
+
 	w.Write([]byte(fmt.Sprintf(`{"pc":%d}`, x)))
 	//call um
 }
-func doclient(r *http.Request) {
+func otherwork(c context.Context) {
+	span, _ := tracer.StartSpanFromContext(c, "other-work")
+	defer span.Finish()
+	x := rand.Intn(100) + 10
+	time.Sleep(time.Duration(x) * time.Millisecond)
+
+}
+func callum(r context.Context) (string, error) {
+	data := ""
 	// create global zipkin traced http client
 	co := zipkinmw.WithClient(&http.Client{Timeout: time.Second * 3})
 	client, err := zipkinmw.NewClient(tracer, co, zipkinmw.ClientTrace(true), zipkinmw.ClientTags(map[string]string{"type:": "from-raw-http-client"}))
 	if err != nil {
 		log.Printf("unable to create client: %+v\n", err)
-		return
+		return data, err
 	}
 
 	// initiate a call to some_func
-	url := fmt.Sprintf("http://%s/%s", umaddr, "/um")
+	url := umAddr
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Printf("unable to create http request: %+v\n", err)
-		return
+		return data, err
 	}
 
-	req = req.WithContext(req.Context())
-	res, err := client.DoWithAppSpan(req, "um")
+	req = req.WithContext(r)
+	res, err := client.DoWithAppSpan(req, "um-client")
 	if err != nil {
 		log.Printf("unable to do http request: %+v\n", err)
-		return
+		return data, err
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	log.Printf("%s", body)
+	return string(body), err
 }
