@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "context"
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
@@ -43,13 +43,16 @@ func main() {
 }
 
 func doclient() {
-	tracer := opentracing.GlobalTracer()
-	span := tracer.StartSpan("world")
+	//tracer := opentracing.GlobalTracer()
+	//span := tracer.StartSpan("world")
+	ctx := context.Background()
+	span, ctx := opentracing.StartSpanFromContext(ctx, "world")
 	defer span.Finish()
 	x := rand.Intn(100) + 50
 	span.SetTag("cost-time", fmt.Sprintf("%d", x))
 	time.Sleep(time.Duration(x) * time.Millisecond)
 	otherclient(span.Context())
+	other3client(ctx)
 	log.Printf("finish doclient")
 }
 func otherclient(parent opentracing.SpanContext) {
@@ -63,4 +66,12 @@ func otherclient(parent opentracing.SpanContext) {
 	x := rand.Intn(100) + 100
 	time.Sleep(time.Duration(x) * time.Millisecond)
 	span.SetTag("other-cost", fmt.Sprintf("%d", x))
+}
+
+func other3client(ctx context.Context) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "client3")
+	defer span.Finish()
+	x := rand.Intn(100) + 100
+	time.Sleep(time.Duration(x) * time.Millisecond)
+	span.SetTag("client3-cost", fmt.Sprintf("%d", x))
 }
