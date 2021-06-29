@@ -14,7 +14,7 @@ import (
 
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
 
-	// "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 	"github.com/uber/jaeger-client-go"
 )
 
@@ -53,17 +53,33 @@ func main() {
 		port = fmt.Sprintf(":%d", *Lport)
 	}
 	// Initialize tracer with a logger and a metrics factory
-	serviceName := "hello-jaeger"
+	serviceName := "gin-jaeger"
 	f := Init(serviceName)
 	defer f()
-	http.HandleFunc("/list", handler)
+	rgin := gin.Default()
+	// http.HandleFunc("/list", handler)
 	log.Printf("listen %s", port)
-
+	m := func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("hehlow")
+	}
+	rgin.Use(func(c *gin.Context) {
+		x := nethttp.Middleware(opentracing.GlobalTracer(), http.HandlerFunc(m))
+		x.ServeHTTP(c.Writer, c.Request)
+		c.Next()
+	})
+	rgin.GET("/list", func(c *gin.Context) {
+		handler(c.Writer, c.Request)
+		c.Next()
+	})
+	rgin.Run(port)
 	http.ListenAndServe(
 		port,
 		// use nethttp.Middleware to enable OpenTracing for server
 		nethttp.Middleware(opentracing.GlobalTracer(), http.DefaultServeMux))
 
+	// if err := http.ListenAndServe(port, nil); err != nil {
+	// 	log.Fatal("err:%s", err)
+	// }
 }
 func handler(w http.ResponseWriter, r *http.Request) {
 	span, ctx := opentracing.StartSpanFromContext(r.Context(), "jaeger")
