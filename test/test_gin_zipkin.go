@@ -1,21 +1,16 @@
 package main
 
 import (
-	// "os"
 	"fmt"
 	"log"
-	"net/http"
+	// "net/http"
 	"time"
 
-	// "contrib.go.opencensus.io/exporter/zipkin"
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing-contrib/go-gin/ginhttp"
 	"github.com/opentracing/opentracing-go"
+	zipkinot "github.com/openzipkin-contrib/zipkin-go-opentracing"
 	openzipkin "github.com/openzipkin/zipkin-go"
-	// "go.opencensus.io/plugin/ochttp"
-	// "go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
-	// zipkin middleware
-	zipkinmw "github.com/openzipkin/zipkin-go/middleware/http"
 	"github.com/openzipkin/zipkin-go/reporter"
 	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
 )
@@ -54,10 +49,10 @@ func Init(opt ...ConfigOpt) func(c *gin.Context) {
 	if err != nil {
 		panic(fmt.Sprintf("err:%s", err))
 	}
+	opentracing.SetGlobalTracer(zipkinot.Wrap(r.tracer))
 	//trace.RegisterExporter(exporter)
 	//trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 	return nil
-	// return ZipKinMiddleware
 }
 func Destroy() {
 	defer func() {
@@ -65,31 +60,18 @@ func Destroy() {
 	}()
 }
 
-// func ZipKinMiddleware(c *gin.Context) {
-// 	span := r.zkTracer.StartSpan(c.FullPath())
-// 	defer span.Finish()
-// 	c.Next()
-// }
 func dohttp(c *gin.Context) {
-	//span := r.zkTracer.StartSpan("dohttp")
-	_, span := trace.StartSpan(c.Request.Context(), "dohttp")
-	defer span.End()
+	span, _ := opentracing.StartSpanFromContext(c.Request.Context(), "dohttp")
+	defer span.Finish()
 	time.Sleep(1 * time.Second)
 }
 func main() {
 
 	Init()
 	defer Destroy()
-	spanName := "test-svr"
 	rgin := gin.Default()
-	// 第三步: 添加一个 middleWare, 为每一个请求添加span
 
-	middler := zipkinmw.NewServerMiddleware(
-		r.tracer,
-		zipkinmw.SpanName(spanName),
-		zipkinmw.TagResponseSize(true),
-	)
-	//rgin.Use(gin.WrapH(middler))
+	rgin.Use(ginhttp.Middleware(opentracing.GlobalTracer()))
 	rgin.GET("/",
 		func(c *gin.Context) {
 			time.Sleep(500 * time.Millisecond)
@@ -98,20 +80,11 @@ func main() {
 	rgin.GET("/list",
 		func(c *gin.Context) {
 			// time.Sleep(500 * time.Millisecond)
+			span, _ := opentracing.StartSpanFromContext(c.Request.Context(), "list")
+			defer span.Finish()
 			dohttp(c)
 			c.JSON(200, gin.H{"code": 200, "msg": "OK2"})
 		})
-	http.ListenAndServe(":8080", middler(rgin))
-	//rgin.Run(":8080")
-	// spanName := "http"
+	rgin.Run(":8080")
 
-	// handler := &ochttp.Handler{Handler: rgin}
-	// if err := view.Register(ochttp.DefaultServerViews...); err != nil {
-	// 	log.Fatal("Failed to register ochttp.DefaultServerViews")
-	// }
-	// http.Handle("/", handler)
-	// port := ":8080"
-	// if err := http.ListenAndServe(port, nil); err != nil {
-	// 	log.Fatal("err:%s", err)
-	// }
 }
