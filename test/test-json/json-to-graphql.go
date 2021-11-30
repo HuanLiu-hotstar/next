@@ -102,6 +102,24 @@ func emptyGabMiddle(c *gin.Context) {
 	}
 	c.Next()
 }
+
+//example for passport
+func passportGabMiddle(c *gin.Context) {
+
+	var ga *gabs.Container
+	if v, ok := c.Value(jsonKey).(*gabs.Container); !ok {
+		ga = gabs.New()
+	} else {
+		ga = v
+	}
+	passport := c.Request.Header.Get("X-Hs-Passport")
+	m := map[string]interface{}{}
+	// we should decode passport,this may be done by Passport-SDK and unmashal it to map[string]interface{}
+	// then ,place it in ga
+	json.Unmarshal([]byte(passport), m)
+	ga.Set(m, "passport")
+	c.Next()
+}
 func gabHeaderMiddle(c *gin.Context) {
 	var ga *gabs.Container
 	if v, ok := c.Value(jsonKey).(*gabs.Container); !ok {
