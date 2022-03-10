@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -22,6 +23,11 @@ import (
 	"go.opencensus.io/trace"
 )
 
+var (
+	addrServ = "127.0.0.1:8080"
+	port     = flag.Int("port", 8080, "server listen port")
+)
+
 func registerZipkin() reporter.Reporter {
 	localEndpoint, err := zipkin.NewEndpoint("golangsvc", "localhost:8081")
 	if err != nil {
@@ -35,6 +41,10 @@ func registerZipkin() reporter.Reporter {
 	return reporter
 }
 func main() {
+	flag.Parse()
+	if port != nil {
+		addrServ = fmt.Sprintf("127.0.0.1:%d", *port)
+	}
 	// set up a span reporter
 	reporter1 := logreporter.NewReporter(log.New(os.Stderr, "", log.LstdFlags))
 	defer reporter1.Close()
@@ -62,7 +72,7 @@ func main() {
 	}
 
 	// initiate a call to some_func
-	addrServ := "127.0.0.1:8080"
+	// addrServ := "127.0.0.1:8080"
 	url := fmt.Sprintf("http://%s/list", addrServ)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

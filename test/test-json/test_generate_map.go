@@ -88,9 +88,22 @@ func testgabs() {
 	d := writeToJson(m)
 	bye, _ := json.Marshal(d)
 	fmt.Println(string(bye))
+	jsonObj = gabs.Wrap(map[string]interface{}{
+		"header": map[string]interface{}{
+			"key": "values",
+		},
+		"query_param": map[string]interface{}{
+			"contentId": "1260023395",
+			"hello":     1,
+			"world":     []int32{2, 3},
+		},
+	})
+	fmt.Println(jsonObj.Path("header.key"))
+	fmt.Println(jsonObj.Path("query_param.contentId"))
 }
 func main() {
-	test_variables()
+	testgabs()
+	// test_variables()
 }
 
 func getparammap(pathVariablesMap map[string]string) map[string]interface{} {

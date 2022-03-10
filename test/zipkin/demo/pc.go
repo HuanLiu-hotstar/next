@@ -19,8 +19,8 @@ var (
 	tracer     *openzipkin.Tracer
 	serverName = "PC-Server"
 	localAddr  = "192.168.1.63"
-	port       = 8083
-	umAddr     = "http://localhost:8084/um"
+	port       = 18083
+	umAddr     = "http://localhost:18084/um"
 )
 
 func main() {

@@ -28,18 +28,23 @@ func main() {
 	reporter := zipkinHTTP.NewReporter("http://localhost:9411/api/v2/spans")
 	defer reporter.Close()
 
-	//exporter := zipkin.NewExporter(reporter, localEndpoint)
-	tracer, err = openzipkin.NewTracer(reporter, openzipkin.WithLocalEndpoint(localEndpoint))
+	ratio := 0.001
+	seed := int64(1000)
+	sample, err := openzipkin.NewBoundarySampler(ratio, seed)
+	if err != nil {
+		log.Fatal("err:%s", err)
+	}
+	tracer, err = openzipkin.NewTracer(reporter, openzipkin.WithLocalEndpoint(localEndpoint), openzipkin.WithSampler(sample))
 	if err != nil {
 		panic(fmt.Sprintf("err:%s", err))
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/list", list)
 	mux.HandleFunc("/client", client)
-	spanName := "root"
+	// spanName := "root"
 	middler := zipkinmw.NewServerMiddleware(
 		tracer,
-		zipkinmw.SpanName(spanName),
+		// zipkinmw.SpanName(spanName),
 		zipkinmw.TagResponseSize(true),
 	)
 
@@ -53,7 +58,7 @@ func main() {
 func client(w http.ResponseWriter, r *http.Request) {
 	span, _ := tracer.StartSpanFromContext(r.Context(), r.URL.Path)
 	defer span.Finish()
-	x := rand.Intn(50) + 30
+	x := rand.Intn(10) + 100
 	time.Sleep(time.Duration(x) * time.Millisecond)
 	w.Write([]byte("hello client"))
 }
@@ -64,7 +69,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 	database(r)
 	serviceb(r)
 	res := strings.Repeat("o", rand.Intn(100)+1)
-	time.Sleep(time.Duration(rand.Intn(100)+1) * time.Millisecond)
+	time.Sleep(time.Duration(rand.Intn(10)+1) * time.Millisecond)
 	w.Write([]byte("Hello, w" + res + "rld!"))
 }
 
@@ -72,7 +77,7 @@ func database(r *http.Request) {
 	span, _ := tracer.StartSpanFromContext(r.Context(), "database")
 	defer span.Finish()
 	cache(r)
-	x := rand.Intn(4) + 100
+	x := rand.Intn(4) + 10
 	time.Sleep(time.Duration(x) * time.Millisecond)
 	span.Tag("sleep-time", fmt.Sprintf("database-cost:%d", x))
 }
@@ -80,7 +85,7 @@ func database(r *http.Request) {
 func cache(r *http.Request) {
 	span, _ := tracer.StartSpanFromContext(r.Context(), "cache")
 	defer span.Finish()
-	x := rand.Intn(4) + 100
+	x := rand.Intn(4) + 10
 	time.Sleep(time.Duration(x) * time.Millisecond)
 	span.Annotate(time.Now(), fmt.Sprintf("cost:%d", x))
 }
@@ -88,7 +93,7 @@ func cache(r *http.Request) {
 func serviceb(r *http.Request) {
 	span, pc := tracer.StartSpanFromContext(r.Context(), "serviceb")
 	defer span.Finish()
-	time.Sleep(time.Duration(rand.Intn(100)+100) * time.Millisecond)
+	time.Sleep(time.Duration(rand.Intn(10)+10) * time.Millisecond)
 	servicec(pc) // servicec is childof serviceb
 	span.Annotate(time.Now(), "endtime")
 }
@@ -97,7 +102,7 @@ func serviceb(r *http.Request) {
 func servicec(c context.Context) {
 	span, ctx := tracer.StartSpanFromContext(c, "servicec")
 	defer span.Finish()
-	time.Sleep(time.Duration(rand.Intn(700)+100) * time.Millisecond)
+	time.Sleep(time.Duration(rand.Intn(10)+10) * time.Millisecond)
 	span.Tag("servicec", "C") // set tags for search servicec
 	doclient(ctx)
 }

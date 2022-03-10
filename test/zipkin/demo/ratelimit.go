@@ -17,6 +17,7 @@ import (
 
 var (
 	tracer *openzipkin.Tracer
+	port   = ":18082"
 )
 
 func main() {
@@ -25,7 +26,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create Zipkin exporter: %v", err)
 	}
+	// addr := "http://localhost:6831"
 	reporter := zipkinHTTP.NewReporter("http://localhost:9411/api/v2/spans")
+	// reporter := zipkinHTTP.NewReporter(addr)
 	defer reporter.Close()
 
 	ratio := 0.001
@@ -48,7 +51,6 @@ func main() {
 	)
 
 	h := middler(mux)
-	port := ":8082"
 	log.Printf("Server listening! %s ...", port)
 	log.Fatal(http.ListenAndServe(port, h))
 

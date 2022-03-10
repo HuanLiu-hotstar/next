@@ -15,22 +15,28 @@ import (
 
 	openzipkin "github.com/openzipkin/zipkin-go"
 
+	// opentracing "github.com/opentracing/opentracing-go"
+
 	pb "github.com/HuanLiu-hotstar/proto/authority"
 	pblt "github.com/HuanLiu-hotstar/proto/ratelimit"
 
 	zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
 	zipkinmw "github.com/openzipkin/zipkin-go/middleware/http"
 	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
+	// "github.com/opentracing-contrib/go-stdlib/nethttp"
 )
 
 var (
-	tracer        *openzipkin.Tracer
-	pcAddr        = "http://127.0.0.1:8083/pc"
-	authAddr      = "http://127.0.0.1:8085/auth"
-	auth2Addr     = "http://127.0.0.1:8085/auth2"
-	rateAddr      = "http://127.0.0.1:8082/ratelimit"
+	tracer *openzipkin.Tracer
+	// tracer        opentracing.Tracer
+	pcAddr        = "http://127.0.0.1:18083/pc"
+	authAddr      = "http://127.0.0.1:18085/auth"
+	auth2Addr     = "http://127.0.0.1:18085/auth2"
+	rateAddr      = "http://127.0.0.1:18082/ratelimit"
 	authGrpcAddr  = "127.0.0.1:50055"
 	limitGrpcAddr = "127.0.0.1:50052"
+
+	port = ":18080"
 )
 
 func main() {
@@ -39,7 +45,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create Zipkin exporter: %v", err)
 	}
+	// addr := "http://0.0.0.0:6831"
 	reporter := zipkinHTTP.NewReporter("http://localhost:9411/api/v2/spans")
+	// reporter := zipkinHTTP.NewReporter(addr)
 	defer reporter.Close()
 
 	// ratio := 0.001
@@ -60,12 +68,13 @@ func main() {
 	// spanName := "root"
 	middler := zipkinmw.NewServerMiddleware(
 		tracer,
-		zipkinmw.SpanName("gateway"),
+		// zipkinmw.SpanName("gateway"),
 		zipkinmw.TagResponseSize(true),
 	)
 
 	h := middler(mux)
-	port := ":8080"
+	// opentracing.SetGlobalTracer(tracer)
+	// h := nethttp.Middleware(tracer, mux)
 	log.Printf("Server listening! %s ...", port)
 	log.Fatal(http.ListenAndServe(port, h))
 
@@ -194,6 +203,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 func callAuthGrpc(ctx context.Context, address, name string) {
 	log.Printf("addr:%s name:%s", address, name)
 	span, nctx := tracer.StartSpanFromContext(ctx, name)
+	// span, nctx := opentracing.StartSpanFromContext(ctx, name)
 	defer span.Finish()
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithStatsHandler(zipkingrpc.NewClientHandler(tracer)))
