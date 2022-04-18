@@ -4,10 +4,12 @@ if [ $# -lt 1 ]; then
     echo "usage:./$0 area_filename"
 fi
 
+# area_filename comes from https://bmfw.www.gov.cn/yqfxdjcx/risk.html
+
 cat $1 | jq '.data.middlelist' | jq '.[].area_name' -r | awk '{print $1,$2}' | uniq >tmpmid.txt
 cat $1 | jq '.data.highlist' | jq '.[].area_name' -r | awk '{print $1,$2}' | uniq >tmphigh.txt
 
-#city-code, match city with code
+#city-code, match city with code, comes from http://www.mca.gov.cn///article/sj/xzqh/2020/2020/2020072805001.html
 citycode=city-code.txt
 
 function getdata() {
