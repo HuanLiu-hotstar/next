@@ -1,0 +1,19 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Channel @key(fields: "content_id") {
+  content_id: String!
+  text: String!
+  done: Boolean!
+  user: User!
+}
+
+type User {
+  content_id: String!
+  name: String!
+}
+
+type Query {
+  GetChannel(content_ids: [String!]): [Channel]
+}
