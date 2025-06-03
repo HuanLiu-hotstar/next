@@ -8,8 +8,12 @@ if [ $# -lt 1 ]; then
     exit -1
 fi
 
+i=1
 for contentID in $*
 do
-    uri=`bash fetchContentDetail.sh $contentID 2>/dev/null | jq -r '.data.fetchContentDetail.contentMeta.coreAttributes.images.horizontalImage.url'`
-    echo "HSTV Poster, $contentID, https://img1.hotstarext.com/image/upload/$uri"
+    data=`bash fetchContentDetail.sh $contentID 2>/dev/null `
+    uri=` echo $data | jq -r '.data.fetchContentDetail.contentMeta.coreAttributes.images.horizontalImage.url'`
+    title=`echo $data| jq -r '.data.fetchContentDetail.contentMeta.coreAttributes.title' `
+    echo "$i. HSTV, $title, $contentID, https://img1.hotstarext.com/image/upload/$uri"
+    i=$((i+1))
 done
