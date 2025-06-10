@@ -1,0 +1,2771 @@
+Visited: /Users/huanliu/hotstar/hs-core-widget-binder-query/domains/consumption/plugins/PlayerWidgetInstance/PlayerWidget/part_queries/details/query/query.gql
+Visited: /Users/huanliu/hotstar/hs-core-widget-binder-query/domains/consumption/plugins/PlayerWidgetInstance/PlayerWidget/part_queries/playback/query/query.gql
+Visited: /Users/huanliu/hotstar/hs-core-widget-binder-query/domains/consumption/plugins/PlayerWidgetInstance/PlayerWidget/query/query.gql
+GQLQuery:{PlayerWidgetInstance/PlayerWidget /Users/huanliu/hotstar/hs-core-widget-binder-query/domains/consumption/plugins/PlayerWidgetInstance/PlayerWidget/part_queries/details/query/query.gql  }
+GQLQuery:{PlayerWidgetInstance/PlayerWidget /Users/huanliu/hotstar/hs-core-widget-binder-query/domains/consumption/plugins/PlayerWidgetInstance/PlayerWidget/part_queries/playback/query/query.gql  }
+GQLQuery:{PlayerWidgetInstance/PlayerWidget /Users/huanliu/hotstar/hs-core-widget-binder-query/domains/consumption/plugins/PlayerWidgetInstance/PlayerWidget/query/query.gql  }
+GQLQuery:{PlayerWidgetInstance/PlayerWidget /Users/huanliu/hotstar/hs-core-widget-binder-query/domains/consumption/plugins/PlayerWidgetInstance/PlayerWidget/part_queries/details/query/query.gql # Write your query or mutation here
+query(
+  $contentId: String!
+  $token: String!
+  $country: String!
+  $platform: String!
+  $vodAdsEnabled: Boolean!
+  $skipCddsQuery: Boolean!
+  $skipWatchNextQuery: Boolean = false
+  $skipConsumptionDDSQuery: Boolean!
+  $playerContext: String
+  $sportsContentId: String! = ""
+  $ifFetchScorecard: Boolean = false
+  $channelId: [String!]
+  $includeChannel: Boolean = false
+  $prerollReference: Boolean!
+  $language: String
+  $mode: String
+  $perPodEnabled: Boolean!
+  $prefetch: Boolean = false
+  $noAdsTags: String
+  $clientCapabilities: String
+  $iaContext: Boolean = false
+) {
+
+  fetchContentDetail(
+    hsRequest: {
+      countryCode: $country
+      platformCode: $platform
+      token: $token
+    }
+    contentId: $contentId
+    isDetail: false
+    allowWatchlistInfo: true
+    clientCapabilities: $clientCapabilities
+  ) @skip(if: $skipCddsQuery) {
+    watchProgress {
+      contentId
+      resumeAt
+      watchRatio
+      watchState
+      watchTag
+      lastUpdated
+      duration
+      watchContentMeta {
+        seasonNumber
+        episodeNumber
+      }
+    }
+
+    contentMeta {
+      ... on CollectionItem {
+        id
+        channelName
+        showID
+        parentInfo {
+          contentId
+          isPaid
+          title
+        }
+        year
+        showSeasonCount
+        duration
+        isLive
+        seasonName
+        displayTag
+      }
+      ... on ShowMeta {
+        id
+        __typename
+        coreAttributes {
+          ... CommonCoreAttributes
+        }
+        isArchived
+        isBTV
+        channelName
+        # ShowType in episode and show has different type hence here must be aliased
+        # As ShowType already used in episode before, we have to rename the showType in show
+        showShowType: showType
+        enrichedMeta {
+          metaType
+          metaValues
+        }
+      }
+      ... on MovieMeta {
+        id
+        __typename
+        coreAttributes {
+          ... CommonCoreAttributes
+        }
+        crispRatingInfo
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+        enrichedMeta {
+          metaType
+          metaValues
+        }
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+      }
+      ... on EpisodeMeta {
+        id
+        coreAttributes {
+          ... CommonCoreAttributes
+        }
+        showId
+        crispRatingInfo
+        seasonNumber
+        seasonId
+        episodeNumber
+        showTitle
+        seasonEpisode
+        broadcastDate
+        paywallTS
+        showType
+        channelName
+        isBTV
+        enrichedMeta {
+          metaValues
+          metaType
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+
+        playMeta {
+          languageSelector
+          contentStartPointSeconds
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        showImages {
+          imageMasthead {
+            url
+          }
+          verticalImage {
+            url
+          }
+          horizontalImage {
+            url
+            height
+            width
+          }
+          titleImage {
+            url
+          }
+        }
+      }
+      ... on ClipMeta {
+        id
+        crispRatingInfo
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+      }
+
+      ... on SportsMeta {
+        id
+        broadcastDate
+        sportsInfo {
+          isHighlight
+          isLive
+          isReplay
+          matchID
+          sportsType
+          tournamentSeasonId
+          tournamentSeasonName
+          sportsTournamentId
+        }
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        subtitleLanguages {
+          code
+          displayName
+          name
+        }
+      }
+
+      coreAttributes {
+        contentId
+        ageRating
+        contentType
+        description
+        title
+        engTitle
+        studioName
+        isCreatorContent
+        languages {
+          code
+          displayName
+        }
+        originalLanguage {
+          code
+          displayName
+        }
+        entityType
+        clipType
+        genres
+        isPaid
+        isLive
+        lifeCycleStage
+        contentProvider
+        images {
+          horizontalImage{
+            url
+            height
+            width
+          }
+          verticalImage {
+            url
+            height
+            width
+          }
+          backgroundImage {
+            url
+          }
+          imageMasthead {
+            url
+          }
+          titleImage {
+            url
+          }
+        }
+        isMonetisable
+        studioId
+        videoMetaTimelines {
+          endTimeMs
+          startTimeMs
+          elementType
+        }
+        trailers
+        startDate
+        autoplayContentId
+        isJcContent
+        isDownloadable
+      }
+    }
+    contentRating {
+      ratingList {
+        key
+      }
+      selectedRating {
+        key
+      }
+    }
+    watchListStatus
+  }
+
+
+  fetchInStreamVideoAd(
+    videoAdRequestBody: {
+      contentId: $contentId
+      adRequestBody: {
+        placementId: PREROLL
+        targetingParams: {
+          noAdsTags: $noAdsTags
+        }
+      }
+      playerContext: $playerContext
+      prerollReference: $prerollReference
+      contentLanguage: $language
+      streamMode: $mode
+      perPodEnabled: $perPodEnabled
+      prefetch: $prefetch
+      iaContext: $iaContext
+      clientCapabilities: $clientCapabilities
+    }
+  ) @include(if: $vodAdsEnabled) {
+    preroll {
+      payload
+      serverUrl
+      showPrerollAd
+      hasThirdPartyWrapper
+    }
+    midroll {
+      serverUrl
+      streamMeta {
+        __typename
+        ... on LiveStreamMeta {
+          ssaiTag
+          userSegment
+          language
+        }
+        ... on VodStreamMeta {
+          adCuePoint {
+            cuePoints
+          }
+        }
+      }
+      showMidrollAd
+      isBlazeV2Enabled
+      isPerPodApiEnabled
+    }
+    adsFreeNudge {
+      showAdsFreeNudge
+      redirectTo
+      packId
+    }
+    showPauseAds
+  }
+
+  fetchWatchNext(
+    contentId: $contentId
+    hsRequest: { countryCode: $country, token: $token, platformCode: $platform }
+  )  @skip(if: $skipWatchNextQuery) {
+    contentId
+    contentMeta {
+      __typename
+      coreAttributes {
+        contentId
+        ageRating
+        contentType
+        entityType
+        description
+        title
+        engTitle
+        studioName
+        languages {
+          code
+          displayName
+        }
+        originalLanguage {
+          code
+          displayName
+        }
+        clipType
+        genres
+        isPaid
+        lifeCycleStage
+        contentProvider
+        images {
+          horizontalImage{
+            url
+            height
+            width
+          }
+          verticalImage {
+            url
+            height
+            width
+          }
+          backgroundImage {
+            url
+          }
+          imageMasthead {
+            url
+          }
+        }
+        isMonetisable
+        studioId
+        videoMetaTimelines {
+          endTimeMs
+          startTimeMs
+          elementType
+        }
+        trailers
+        startDate
+        autoplayContentId
+      }
+
+      ... on EpisodeMeta {
+        id
+        showId
+        crispRatingInfo
+        seasonNumber
+        seasonId
+        episodeNumber
+        seasonEpisode
+        showTitle
+        broadcastDate
+        paywallTS
+        showType
+        channelName
+        enrichedMeta {
+          metaValues
+          metaType
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+        showImages {
+          imageMasthead {
+            url
+          }
+          verticalImage {
+            url
+          }
+          horizontalImage {
+            url
+            height
+            width
+          }
+          titleImage {
+            url
+          }
+        }
+        playMeta {
+          duration
+        }
+      }
+    }
+
+  }
+
+  GetKeymomentCtx(
+    req: { contentId: $contentId }
+  ) @skip(if: $skipConsumptionDDSQuery) {
+    code
+    msg
+    contentId
+    parentContentInfo {
+      title
+      contentType
+      contentId
+      live
+      siMatchId
+      sportType
+      tournamentId
+      tournamentName
+      cmsMatchId
+    }
+    keymomentCtx {
+      currentKeymoment {
+        feed_id
+        duration
+        associated_content_id
+        content_id
+        content_type
+        title
+        description
+        markin_time
+        markout_time
+        category
+        tournamentId
+        tournamentName
+        cmsMatchId
+        thumbnail_url
+        display_over
+        innings_no
+        commentary_title
+        tenants
+        active
+        keymoment_match_time
+      }
+      nextKeymoment {
+        feed_id
+        duration
+        associated_content_id
+        content_id
+        content_type
+        title
+        description
+        markin_time
+        markout_time
+        category
+        tournamentId
+        tournamentName
+        cmsMatchId
+        thumbnail_url
+        display_over
+        innings_no
+        commentary_title
+        tenants
+        active
+        keymoment_match_time
+      }
+    }
+  }
+
+  GetScorecard(req: { contentId: $sportsContentId }) @include(if: $ifFetchScorecard) {
+    code
+    msg
+    contentId
+    scorecard {
+      match_id
+      is_match_over
+      start_time
+      is_test_match
+      timestamp
+      score_summary {
+        teams {
+          name
+          long_name
+          abbreviation
+        }
+        team_score_summary
+      }
+      score_boards {
+        is_zero_state
+        team_name
+        inn_is_over
+        total {
+          score
+          overs
+          runs_rate
+        }
+      }
+    }
+  }
+
+GetLiveChannel(req: {channelId: $channelId}) @include(if: $includeChannel) {
+      msg
+      code
+      data {
+          channel_id
+          content_id
+          now_playing
+          next_playing
+          rating {
+            title
+            sub_title
+          }
+      }
+  }
+
+}
+
+
+fragment CommonCoreAttributes on CoreAttributes {
+  title
+  engTitle
+  ageRating
+  description
+  isPaid
+  isLive
+  lifeCycleStage
+  studioId
+  studioName
+  isCreatorContent
+  trailers
+  languages {
+    code
+    displayName
+    name
+  }
+  genres
+  images {
+    horizontalImage {
+      url
+      theme
+    }
+    titleImage {
+      url
+      width
+      height
+    }
+    verticalImage {
+      url
+      theme
+    }
+    backgroundImage {
+      url
+    }
+    imageMasthead {
+      url
+    }
+    imageExtendedMeta {
+      imageSelectionAttributes {
+        variant
+        imageSelectionLogic
+      }
+      imageLanguages {
+        scriptLanguages
+        calloutLanguages
+      }
+    }
+  }
+  entityType
+  contentProvider
+  originalLanguage {
+    code
+  }
+  contentId
+  contentType
+  clipType
+  releaseDate
+  autoplayContentId
+  isEligibleForFreePreview
+  calloutText
+  calloutSubtext
+  releaseDateDisplayMode
+  calloutTags {
+    name
+    category
+    metaSets {
+      metaType
+      elements {
+        __typename
+        ... on LocalisableTextObject {
+          stringId
+          stringText
+          placeholderMap {
+            key
+            value
+          }
+        }
+        ... on ImageMeta {
+          url
+          height
+          width
+          alt
+        }
+      }
+    }
+  }
+  reasonToWatchTags {
+    name
+    category
+    metaSets {
+      metaType
+      elements {
+        __typename
+        ... on LocalisableTextObject {
+          stringId
+          stringText
+          placeholderMap {
+            key
+            value
+            stringId
+          }
+        }
+        ... on ImageMeta {
+          url
+          height
+          width
+          alt
+        }
+      }
+    }
+  }
+} query ($contentId:String!, $token:String!, $country:String!, $platform:String!, $vodAdsEnabled:Boolean!, $skipCddsQuery:Boolean!, $skipWatchNextQuery:Boolean = false, $skipConsumptionDDSQuery:Boolean!, $playerContext:String, $sportsContentId:String! = "", $ifFetchScorecard:Boolean = false, $channelId:[String!], $includeChannel:Boolean = false, $prerollReference:Boolean!, $language:String, $mode:String, $perPodEnabled:Boolean!, $prefetch:Boolean = false, $noAdsTags:String, $clientCapabilities:String, $iaContext:Boolean = false) {
+  fetchContentDetail(
+    hsRequest: { countryCode: $country, platformCode: $platform, token: $token }
+    contentId: $contentId
+    isDetail: false
+    allowWatchlistInfo: true
+    clientCapabilities: $clientCapabilities
+  ) @skip(if: $skipCddsQuery) {
+    watchProgress {
+      contentId
+      resumeAt
+      watchRatio
+      watchState
+      watchTag
+      lastUpdated
+      duration
+      watchContentMeta {
+        seasonNumber
+        episodeNumber
+      }
+    }
+    contentMeta {
+      ... on CollectionItem {
+        id
+        channelName
+        showID
+        parentInfo {
+          contentId
+          isPaid
+          title
+        }
+        year
+        showSeasonCount
+        duration
+        isLive
+        seasonName
+        displayTag
+      }
+      ... on ShowMeta {
+        id
+        __typename
+        coreAttributes {
+          ... CommonCoreAttributes
+        }
+        isArchived
+        isBTV
+        channelName
+        showShowType: showType
+        enrichedMeta {
+          metaType
+          metaValues
+        }
+      }
+      ... on MovieMeta {
+        id
+        __typename
+        coreAttributes {
+          ... CommonCoreAttributes
+        }
+        crispRatingInfo
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+        enrichedMeta {
+          metaType
+          metaValues
+        }
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+      }
+      ... on EpisodeMeta {
+        id
+        coreAttributes {
+          ... CommonCoreAttributes
+        }
+        showId
+        crispRatingInfo
+        seasonNumber
+        seasonId
+        episodeNumber
+        showTitle
+        seasonEpisode
+        broadcastDate
+        paywallTS
+        showType
+        channelName
+        isBTV
+        enrichedMeta {
+          metaValues
+          metaType
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+        playMeta {
+          languageSelector
+          contentStartPointSeconds
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        showImages {
+          imageMasthead {
+            url
+          }
+          verticalImage {
+            url
+          }
+          horizontalImage {
+            url
+            height
+            width
+          }
+          titleImage {
+            url
+          }
+        }
+      }
+      ... on ClipMeta {
+        id
+        crispRatingInfo
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+      }
+      ... on SportsMeta {
+        id
+        broadcastDate
+        sportsInfo {
+          isHighlight
+          isLive
+          isReplay
+          matchID
+          sportsType
+          tournamentSeasonId
+          tournamentSeasonName
+          sportsTournamentId
+        }
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        subtitleLanguages {
+          code
+          displayName
+          name
+        }
+      }
+      coreAttributes {
+        contentId
+        ageRating
+        contentType
+        description
+        title
+        engTitle
+        studioName
+        isCreatorContent
+        languages {
+          code
+          displayName
+        }
+        originalLanguage {
+          code
+          displayName
+        }
+        entityType
+        clipType
+        genres
+        isPaid
+        isLive
+        lifeCycleStage
+        contentProvider
+        images {
+          horizontalImage {
+            url
+            height
+            width
+          }
+          verticalImage {
+            url
+            height
+            width
+          }
+          backgroundImage {
+            url
+          }
+          imageMasthead {
+            url
+          }
+          titleImage {
+            url
+          }
+        }
+        isMonetisable
+        studioId
+        videoMetaTimelines {
+          endTimeMs
+          startTimeMs
+          elementType
+        }
+        trailers
+        startDate
+        autoplayContentId
+        isJcContent
+        isDownloadable
+      }
+    }
+    contentRating {
+      ratingList {
+        key
+      }
+      selectedRating {
+        key
+      }
+    }
+    watchListStatus
+  }
+  fetchInStreamVideoAd(videoAdRequestBody: { contentId: $contentId, adRequestBody: { placementId: PREROLL, targetingParams: { noAdsTags: $noAdsTags } }, playerContext: $playerContext, prerollReference: $prerollReference, contentLanguage: $language, streamMode: $mode, perPodEnabled: $perPodEnabled, prefetch: $prefetch, iaContext: $iaContext, clientCapabilities: $clientCapabilities }) @include(if: $vodAdsEnabled) {
+    preroll {
+      payload
+      serverUrl
+      showPrerollAd
+      hasThirdPartyWrapper
+    }
+    midroll {
+      serverUrl
+      streamMeta {
+        __typename
+        ... on LiveStreamMeta {
+          ssaiTag
+          userSegment
+          language
+        }
+        ... on VodStreamMeta {
+          adCuePoint {
+            cuePoints
+          }
+        }
+      }
+      showMidrollAd
+      isBlazeV2Enabled
+      isPerPodApiEnabled
+    }
+    adsFreeNudge {
+      showAdsFreeNudge
+      redirectTo
+      packId
+    }
+    showPauseAds
+  }
+  fetchWatchNext(
+    contentId: $contentId
+    hsRequest: { countryCode: $country, token: $token, platformCode: $platform }
+  ) @skip(if: $skipWatchNextQuery) {
+    contentId
+    contentMeta {
+      __typename
+      coreAttributes {
+        contentId
+        ageRating
+        contentType
+        entityType
+        description
+        title
+        engTitle
+        studioName
+        languages {
+          code
+          displayName
+        }
+        originalLanguage {
+          code
+          displayName
+        }
+        clipType
+        genres
+        isPaid
+        lifeCycleStage
+        contentProvider
+        images {
+          horizontalImage {
+            url
+            height
+            width
+          }
+          verticalImage {
+            url
+            height
+            width
+          }
+          backgroundImage {
+            url
+          }
+          imageMasthead {
+            url
+          }
+        }
+        isMonetisable
+        studioId
+        videoMetaTimelines {
+          endTimeMs
+          startTimeMs
+          elementType
+        }
+        trailers
+        startDate
+        autoplayContentId
+      }
+      ... on EpisodeMeta {
+        id
+        showId
+        crispRatingInfo
+        seasonNumber
+        seasonId
+        episodeNumber
+        seasonEpisode
+        showTitle
+        broadcastDate
+        paywallTS
+        showType
+        channelName
+        enrichedMeta {
+          metaValues
+          metaType
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+        showImages {
+          imageMasthead {
+            url
+          }
+          verticalImage {
+            url
+          }
+          horizontalImage {
+            url
+            height
+            width
+          }
+          titleImage {
+            url
+          }
+        }
+        playMeta {
+          duration
+        }
+      }
+    }
+  }
+  GetKeymomentCtx(req: { contentId: $contentId }) @skip(if: $skipConsumptionDDSQuery) {
+    code
+    msg
+    contentId
+    parentContentInfo {
+      title
+      contentType
+      contentId
+      live
+      siMatchId
+      sportType
+      tournamentId
+      tournamentName
+      cmsMatchId
+    }
+    keymomentCtx {
+      currentKeymoment {
+        feed_id
+        duration
+        associated_content_id
+        content_id
+        content_type
+        title
+        description
+        markin_time
+        markout_time
+        category
+        tournamentId
+        tournamentName
+        cmsMatchId
+        thumbnail_url
+        display_over
+        innings_no
+        commentary_title
+        tenants
+        active
+        keymoment_match_time
+      }
+      nextKeymoment {
+        feed_id
+        duration
+        associated_content_id
+        content_id
+        content_type
+        title
+        description
+        markin_time
+        markout_time
+        category
+        tournamentId
+        tournamentName
+        cmsMatchId
+        thumbnail_url
+        display_over
+        innings_no
+        commentary_title
+        tenants
+        active
+        keymoment_match_time
+      }
+    }
+  }
+  GetScorecard(req: { contentId: $sportsContentId }) @include(if: $ifFetchScorecard) {
+    code
+    msg
+    contentId
+    scorecard {
+      match_id
+      is_match_over
+      start_time
+      is_test_match
+      timestamp
+      score_summary {
+        teams {
+          name
+          long_name
+          abbreviation
+        }
+        team_score_summary
+      }
+      score_boards {
+        is_zero_state
+        team_name
+        inn_is_over
+        total {
+          score
+          overs
+          runs_rate
+        }
+      }
+    }
+  }
+  GetLiveChannel(req: { channelId: $channelId }) @include(if: $includeChannel) {
+    msg
+    code
+    data {
+      channel_id
+      content_id
+      now_playing
+      next_playing
+      rating {
+        title
+        sub_title
+      }
+    }
+  }
+}
+fragment CommonCoreAttributes on CoreAttributes {
+  title
+  engTitle
+  ageRating
+  description
+  isPaid
+  isLive
+  lifeCycleStage
+  studioId
+  studioName
+  isCreatorContent
+  trailers
+  languages {
+    code
+    displayName
+    name
+  }
+  genres
+  images {
+    horizontalImage {
+      url
+      theme
+    }
+    titleImage {
+      url
+      width
+      height
+    }
+    verticalImage {
+      url
+      theme
+    }
+    backgroundImage {
+      url
+    }
+    imageMasthead {
+      url
+    }
+    imageExtendedMeta {
+      imageSelectionAttributes {
+        variant
+        imageSelectionLogic
+      }
+      imageLanguages {
+        scriptLanguages
+        calloutLanguages
+      }
+    }
+  }
+  entityType
+  contentProvider
+  originalLanguage {
+    code
+  }
+  contentId
+  contentType
+  clipType
+  releaseDate
+  autoplayContentId
+  isEligibleForFreePreview
+  calloutText
+  calloutSubtext
+  releaseDateDisplayMode
+  calloutTags {
+    name
+    category
+    metaSets {
+      metaType
+      elements {
+        __typename
+        ... on LocalisableTextObject {
+          stringId
+          stringText
+          placeholderMap {
+            key
+            value
+          }
+        }
+        ... on ImageMeta {
+          url
+          height
+          width
+          alt
+        }
+      }
+    }
+  }
+  reasonToWatchTags {
+    name
+    category
+    metaSets {
+      metaType
+      elements {
+        __typename
+        ... on LocalisableTextObject {
+          stringId
+          stringText
+          placeholderMap {
+            key
+            value
+            stringId
+          }
+        }
+        ... on ImageMeta {
+          url
+          height
+          width
+          alt
+        }
+      }
+    }
+  }
+}
+}
+GQLQuery:{PlayerWidgetInstance/PlayerWidget /Users/huanliu/hotstar/hs-core-widget-binder-query/domains/consumption/plugins/PlayerWidgetInstance/PlayerWidget/part_queries/playback/query/query.gql # Write your query or mutation here
+query (
+  $contentId: String!
+  $token: String!
+  $country: String!
+  $platform: String!
+  $clientCapabilities: String!
+  $drmParameters: String
+  $xHsPlatform: String!
+  $language: String
+  $degradationType: DegradationType
+  $requestedCDN: String
+  $requestFeatures: [RequestFeatures]
+  $appVersion: String!
+  $mode: String
+  $hwInfo: String
+) {
+  GetPlaybackUrls(
+    playbackRequestBody: {
+      contentId: $contentId
+      headers: {
+        xHsUserToken: $token
+        xCountryCode: $country
+        xHsRequestId: "beb5a558-1335-4473-80af-26bb8d4c2529"
+        xHsPlatform: $xHsPlatform
+      }
+      platformDetails: {
+        appVersion: $appVersion
+        deviceId: "3d3f6f1d-8216-4c94-8018-5d0c2e80b425"
+        platform: $platform
+        platformVersion: "94.0.4606.61"
+        osDetails: { osName: "Mac%20OS", osVersion: "10.15.7" }
+      }
+      language: $language
+      resolution: auto
+      clientCapabilities: $clientCapabilities
+      drmParameters: $drmParameters
+      pcDdsHeaders: {
+        degradationType: $degradationType
+        requestedCDN: $requestedCDN
+      }
+      requestFeatures: $requestFeatures
+      mode: $mode
+      hwInfo: $hwInfo
+    }
+  ) {
+    __typename
+    ... on PlaybackSuccessResponse {
+      message
+      playbackData {
+        match
+        contentId
+        playbackSets {
+          playbackCdnType
+          playbackUrl
+          tagsCombination
+          tokenAlgorithm
+          licenseUrl
+          playbackUrlLanguage
+          channelId
+        }
+        fallbackPlaybackSets {
+          playbackCdnType
+          playbackUrl
+          tagsCombination
+          tokenAlgorithm
+          licenseUrl
+          playbackUrlLanguage
+          channelId
+        }
+        videoMeta {
+          urlMeta
+          timelines
+        }
+      }
+      additionalInfo {
+        isFreemiumContent
+        userAllowedResolutions
+        freeDuration {
+          totalTime
+          elapsedTime
+          reason
+          hideTimer
+        }
+        freePreview {
+          duration
+        }
+        userAllowedAudioChannels
+        entitlementInfo
+        videoQuality {
+          videoQualityResolution {
+            resolutionStatusCode
+            isAllowed
+            isAuto
+            resolutionStatusMessage
+            resolutionType
+          }
+        }
+        userSupportedFeatures {
+          enabled
+          reason
+          supportedFeature
+        }
+        clientConfig {
+          key
+          value
+        }
+      }
+      sessionId
+    }
+    ... on PlaybackErrorResponse {
+      errorCode
+      message
+      additionalErrorInfo
+      consentError {
+        consentMeta
+        consentTrackingId
+        consentType
+      }
+    }
+  }
+} query ($contentId:String!, $token:String!, $country:String!, $platform:String!, $clientCapabilities:String!, $drmParameters:String, $xHsPlatform:String!, $language:String, $degradationType:DegradationType, $requestedCDN:String, $requestFeatures:[RequestFeatures], $appVersion:String!, $mode:String, $hwInfo:String) {
+  GetPlaybackUrls(playbackRequestBody: { contentId: $contentId, headers: { xHsUserToken: $token, xCountryCode: $country, xHsRequestId: "beb5a558-1335-4473-80af-26bb8d4c2529", xHsPlatform: $xHsPlatform }, platformDetails: { appVersion: $appVersion, deviceId: "3d3f6f1d-8216-4c94-8018-5d0c2e80b425", platform: $platform, platformVersion: "94.0.4606.61", osDetails: { osName: "Mac%20OS", osVersion: "10.15.7" } }, language: $language, resolution: auto, clientCapabilities: $clientCapabilities, drmParameters: $drmParameters, pcDdsHeaders: { degradationType: $degradationType, requestedCDN: $requestedCDN }, requestFeatures: $requestFeatures, mode: $mode, hwInfo: $hwInfo }) {
+    __typename
+    ... on PlaybackSuccessResponse {
+      message
+      playbackData {
+        match
+        contentId
+        playbackSets {
+          playbackCdnType
+          playbackUrl
+          tagsCombination
+          tokenAlgorithm
+          licenseUrl
+          playbackUrlLanguage
+          channelId
+        }
+        fallbackPlaybackSets {
+          playbackCdnType
+          playbackUrl
+          tagsCombination
+          tokenAlgorithm
+          licenseUrl
+          playbackUrlLanguage
+          channelId
+        }
+        videoMeta {
+          urlMeta
+          timelines
+        }
+      }
+      additionalInfo {
+        isFreemiumContent
+        userAllowedResolutions
+        freeDuration {
+          totalTime
+          elapsedTime
+          reason
+          hideTimer
+        }
+        freePreview {
+          duration
+        }
+        userAllowedAudioChannels
+        entitlementInfo
+        videoQuality {
+          videoQualityResolution {
+            resolutionStatusCode
+            isAllowed
+            isAuto
+            resolutionStatusMessage
+            resolutionType
+          }
+        }
+        userSupportedFeatures {
+          enabled
+          reason
+          supportedFeature
+        }
+        clientConfig {
+          key
+          value
+        }
+      }
+      sessionId
+    }
+    ... on PlaybackErrorResponse {
+      errorCode
+      message
+      additionalErrorInfo
+      consentError {
+        consentMeta
+        consentTrackingId
+        consentType
+      }
+    }
+  }
+}
+}
+GQLQuery:{PlayerWidgetInstance/PlayerWidget /Users/huanliu/hotstar/hs-core-widget-binder-query/domains/consumption/plugins/PlayerWidgetInstance/PlayerWidget/query/query.gql # Write your query or mutation here
+##############################################################################
+# -------------------------GOING TO BE DEPRECATED ----------------------------
+# Please note for PlayerWidget, part query support is enabled for all platforms
+# this query will be deprecated, while we completely transition to part queries
+# please ensure any update made in this file is also updated in corresponding
+# part query files
+###############################################################################
+query(
+  $contentId: String!
+  $token: String!
+  $country: String!
+  $platform: String!
+  $clientCapabilities: String!
+  $drmParameters: String
+  $xHsPlatform: String!
+  $vodAdsEnabled: Boolean!
+  $language: String
+  $skipCddsQuery: Boolean!
+  $skipConsumptionDDSQuery: Boolean!
+  $skipWatchNextQuery: Boolean = false
+  $degradationType: DegradationType
+  $requestedCDN: String
+  $requestFeatures: [RequestFeatures]
+  $playerContext: String
+  $appVersion: String!
+  $mode: String
+  $sportsContentId: String! = ""
+  $ifFetchScorecard: Boolean = false
+  $prerollReference: Boolean!
+  $channelId: [String!]
+  $includeChannel: Boolean = false
+  $perPodEnabled: Boolean!
+  $prefetch: Boolean = false
+  $fetchCr: Boolean = false
+  $noAdsTags: String
+  $hwInfo: String
+) {
+  GetPlaybackUrls(
+    playbackRequestBody: {
+      contentId: $contentId
+      headers: {
+        xHsUserToken: $token
+        xCountryCode: $country
+        xHsRequestId: "beb5a558-1335-4473-80af-26bb8d4c2529"
+        xHsPlatform: $xHsPlatform
+      }
+      platformDetails: {
+        appVersion: $appVersion
+        deviceId: "3d3f6f1d-8216-4c94-8018-5d0c2e80b425"
+        platform: $platform
+        platformVersion: "94.0.4606.61"
+        osDetails: { osName: "Mac%20OS", osVersion: "10.15.7" }
+      }
+      language: $language
+      resolution: auto
+      clientCapabilities: $clientCapabilities
+      drmParameters: $drmParameters
+      pcDdsHeaders: {
+          degradationType: $degradationType
+          requestedCDN: $requestedCDN
+      }
+      requestFeatures: $requestFeatures
+      mode: $mode
+      hwInfo: $hwInfo
+    }
+  ) {
+    __typename
+    ... on PlaybackSuccessResponse {
+      message
+      playbackData {
+        match
+        contentId
+        playbackSets {
+          playbackCdnType
+          playbackUrl
+          tagsCombination
+          tokenAlgorithm
+          licenseUrl
+          playbackUrlLanguage
+        }
+        fallbackPlaybackSets {
+          playbackCdnType
+          playbackUrl
+          tagsCombination
+          tokenAlgorithm
+          licenseUrl
+          playbackUrlLanguage
+        }
+        videoMeta {
+          urlMeta
+          timelines
+        }
+      }
+      additionalInfo {
+        isFreemiumContent
+        userAllowedResolutions
+        freeDuration {
+          totalTime
+          elapsedTime
+          reason
+          hideTimer
+        }
+        freePreview {
+          duration
+        }
+        userAllowedAudioChannels
+        entitlementInfo
+        clientConfig {
+          key
+          value
+        }
+      }
+      sessionId
+    }
+    ... on PlaybackErrorResponse {
+      errorCode
+      message
+      additionalErrorInfo
+      consentError {
+        consentMeta
+        consentTrackingId
+        consentType
+      }
+    }
+  }
+
+  fetchContentDetail(
+    hsRequest: {
+      countryCode: $country
+      platformCode: $platform
+      token: $token
+    }
+    contentId: $contentId
+    isDetail: false
+  ) @skip(if: $skipCddsQuery) {
+    watchProgress {
+      contentId
+      resumeAt
+      watchRatio
+      watchState
+      watchTag
+      lastUpdated
+      duration
+    }
+    
+    contentMeta {
+      ... on CollectionItem {
+        id
+        channelName
+        showID
+        parentInfo {
+          contentId
+          isPaid
+          title
+        }
+        year
+        showSeasonCount
+        duration
+        isLive
+        seasonName
+        displayTag
+      }
+      ... on ShowMeta {
+        id
+        channelName
+      }
+      ... on MovieMeta {
+        id
+        crispRatingInfo
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+        
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+      }
+      ... on EpisodeMeta {
+        id
+        showId
+        seasonEpisode
+        crispRatingInfo
+        seasonNumber
+        seasonId
+        episodeNumber
+        showTitle
+        broadcastDate
+        paywallTS
+        showType
+        channelName
+        enrichedMeta {
+          metaValues
+          metaType
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+
+        playMeta {
+          languageSelector
+          contentStartPointSeconds
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        showImages {
+          imageMasthead {
+            url
+          }
+          verticalImage {
+              url
+          }
+          horizontalImage {
+            url
+            height
+            width
+          }
+        }
+      }
+      ... on ClipMeta {
+        id
+        crispRatingInfo
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+      }
+
+      ... on SportsMeta {
+        id
+        broadcastDate
+        sportsInfo {
+          isHighlight
+          isLive
+          isReplay
+          matchID
+          sportsType
+          tournamentSeasonId
+          tournamentSeasonName
+          sportsTournamentId
+        }
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        subtitleLanguages {
+          code
+          displayName
+          name
+        }
+      }
+
+      coreAttributes {
+        contentId
+        isCreatorContent
+        ageRating
+        contentType
+        description
+        title
+        engTitle
+        studioName
+        languages {
+          code
+          displayName
+        }
+        originalLanguage {
+          code
+          displayName
+        }
+        entityType
+        clipType
+        genres
+        isPaid
+        isLive
+        lifeCycleStage
+        contentProvider
+        images {
+          horizontalImage{
+              url
+              height
+              width
+          }
+          verticalImage {
+              url
+              height
+              width
+          }
+          backgroundImage {
+              url
+          }
+          imageMasthead {
+              url
+          }
+          titleImage {
+              url
+          }
+        }
+        isMonetisable
+        studioId
+        videoMetaTimelines {
+          endTimeMs
+          startTimeMs
+          elementType
+        }
+        trailers
+        startDate
+        autoplayContentId
+      }
+    }
+    contentRating @include(if: $fetchCr) {
+      ratingList {
+        key
+      }
+      selectedRating {
+        key
+      }
+    }
+  }
+
+
+   fetchInStreamVideoAd(
+    videoAdRequestBody: {
+      contentId: $contentId
+      adRequestBody: {
+        placementId: PREROLL
+        targetingParams: {
+          noAdsTags: $noAdsTags
+        }
+      }
+      playerContext: $playerContext
+      prerollReference: $prerollReference
+      contentLanguage: $language
+      streamMode: $mode
+      perPodEnabled: $perPodEnabled
+      prefetch: $prefetch
+      clientCapabilities: $clientCapabilities
+    }
+   ) @include(if: $vodAdsEnabled) {
+    preroll {
+      payload
+      serverUrl
+      showPrerollAd
+      hasThirdPartyWrapper
+    }
+    midroll {
+      serverUrl
+      streamMeta {
+        __typename
+        ... on LiveStreamMeta {
+          ssaiTag
+          userSegment
+          language
+        }
+        ... on VodStreamMeta {
+          adCuePoint {
+            cuePoints
+          }
+        }
+      }
+      showMidrollAd
+      isBlazeV2Enabled
+      isPerPodApiEnabled
+    }
+    adsFreeNudge {
+      showAdsFreeNudge
+      redirectTo
+      packId
+    }
+    showPauseAds
+   }
+
+  fetchWatchNext(
+    contentId: $contentId
+    hsRequest: { countryCode: $country, token: $token, platformCode: $platform }
+  )  @skip(if: $skipWatchNextQuery) {
+    contentId
+    contentMeta {
+      __typename
+      coreAttributes {
+        contentId
+        ageRating
+        contentType
+        entityType
+        description
+        title
+        engTitle
+        studioName
+        isCreatorContent
+        languages {
+          code
+          displayName
+        }
+        originalLanguage {
+          code
+          displayName
+        }
+        clipType
+        genres
+        isPaid
+        lifeCycleStage
+        contentProvider
+        images {
+          horizontalImage{
+            url
+            height
+            width
+          }
+          verticalImage {
+            url
+            height
+            width
+          }
+          backgroundImage {
+            url
+          }
+          imageMasthead {
+            url
+          }
+        }
+        isMonetisable
+        studioId
+        videoMetaTimelines {
+          endTimeMs
+          startTimeMs
+          elementType
+        }
+        trailers
+        startDate
+        autoplayContentId
+      }
+
+      ... on EpisodeMeta {
+        id
+        showId
+        crispRatingInfo
+        seasonNumber
+        seasonId
+        seasonEpisode
+        episodeNumber
+        showTitle
+        broadcastDate
+        paywallTS
+        showType
+        channelName
+        enrichedMeta {
+          metaValues
+          metaType
+        }
+        showImages {
+          imageMasthead {
+            url
+          }
+          verticalImage {
+            url
+          }
+          horizontalImage {
+            url
+            height
+            width
+          }
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+        playMeta {
+          duration
+        }
+      }
+    }
+
+  }
+
+  GetKeymomentCtx(
+    req: { contentId: $contentId }
+    ) @skip(if: $skipConsumptionDDSQuery) {
+    code
+    msg
+    contentId
+    parentContentInfo {
+      title
+      contentType
+      contentId
+      live
+      siMatchId
+      sportType
+      tournamentId
+      tournamentName
+      cmsMatchId
+    }
+    keymomentCtx {
+      currentKeymoment {
+        feed_id
+        duration
+        associated_content_id
+        content_id
+        content_type
+        title
+        description
+        markin_time
+        markout_time
+        category
+        tournamentId
+        tournamentName
+        cmsMatchId
+        thumbnail_url
+        display_over
+        innings_no
+        commentary_title
+        tenants
+        active
+        keymoment_match_time
+      }
+      nextKeymoment {
+        feed_id
+        duration
+        associated_content_id
+        content_id
+        content_type
+        title
+        description
+        markin_time
+        markout_time
+        category
+        tournamentId
+        tournamentName
+        cmsMatchId
+        thumbnail_url
+        display_over
+        innings_no
+        commentary_title
+        tenants
+        active
+        keymoment_match_time
+      }
+    }
+  }
+
+  GetScorecard(req: { contentId: $sportsContentId }) @include(if: $ifFetchScorecard) {
+    code
+    msg
+    contentId
+    scorecard {
+      match_id
+      is_match_over
+      start_time
+      is_test_match
+      timestamp
+      score_summary {
+        teams {
+          name
+          long_name
+          abbreviation
+        }
+        team_score_summary
+      }
+      score_boards {
+        is_zero_state
+        team_name
+        inn_is_over
+        total {
+          score
+          overs
+          runs_rate
+        }
+      }
+    }
+  }
+
+  GetLiveChannel(req: {channelId: $channelId}) @include(if: $includeChannel) {
+      msg
+      code
+      data {
+          channel_id
+          content_id
+          now_playing
+          next_playing
+          rating {
+            title
+            sub_title
+          }
+      }
+  }
+
+}
+
+#############################################################################
+# -------------------------GOING TO BE DEPRECATED ----------------------------
+# Please note for PlayerWidget, part query support is enabled for all platforms
+# this query will be deprecated, while we completely transition to part queries
+# please ensure any update made in this file is also updated in corresponding
+# part query files
+###############################################################################
+ query ($contentId:String!, $token:String!, $country:String!, $platform:String!, $clientCapabilities:String!, $drmParameters:String, $xHsPlatform:String!, $vodAdsEnabled:Boolean!, $language:String, $skipCddsQuery:Boolean!, $skipConsumptionDDSQuery:Boolean!, $skipWatchNextQuery:Boolean = false, $degradationType:DegradationType, $requestedCDN:String, $requestFeatures:[RequestFeatures], $playerContext:String, $appVersion:String!, $mode:String, $sportsContentId:String! = "", $ifFetchScorecard:Boolean = false, $prerollReference:Boolean!, $channelId:[String!], $includeChannel:Boolean = false, $perPodEnabled:Boolean!, $prefetch:Boolean = false, $fetchCr:Boolean = false, $noAdsTags:String, $hwInfo:String) {
+  GetPlaybackUrls(playbackRequestBody: { contentId: $contentId, headers: { xHsUserToken: $token, xCountryCode: $country, xHsRequestId: "beb5a558-1335-4473-80af-26bb8d4c2529", xHsPlatform: $xHsPlatform }, platformDetails: { appVersion: $appVersion, deviceId: "3d3f6f1d-8216-4c94-8018-5d0c2e80b425", platform: $platform, platformVersion: "94.0.4606.61", osDetails: { osName: "Mac%20OS", osVersion: "10.15.7" } }, language: $language, resolution: auto, clientCapabilities: $clientCapabilities, drmParameters: $drmParameters, pcDdsHeaders: { degradationType: $degradationType, requestedCDN: $requestedCDN }, requestFeatures: $requestFeatures, mode: $mode, hwInfo: $hwInfo }) {
+    __typename
+    ... on PlaybackSuccessResponse {
+      message
+      playbackData {
+        match
+        contentId
+        playbackSets {
+          playbackCdnType
+          playbackUrl
+          tagsCombination
+          tokenAlgorithm
+          licenseUrl
+          playbackUrlLanguage
+        }
+        fallbackPlaybackSets {
+          playbackCdnType
+          playbackUrl
+          tagsCombination
+          tokenAlgorithm
+          licenseUrl
+          playbackUrlLanguage
+        }
+        videoMeta {
+          urlMeta
+          timelines
+        }
+      }
+      additionalInfo {
+        isFreemiumContent
+        userAllowedResolutions
+        freeDuration {
+          totalTime
+          elapsedTime
+          reason
+          hideTimer
+        }
+        freePreview {
+          duration
+        }
+        userAllowedAudioChannels
+        entitlementInfo
+        clientConfig {
+          key
+          value
+        }
+      }
+      sessionId
+    }
+    ... on PlaybackErrorResponse {
+      errorCode
+      message
+      additionalErrorInfo
+      consentError {
+        consentMeta
+        consentTrackingId
+        consentType
+      }
+    }
+  }
+  fetchContentDetail(
+    hsRequest: { countryCode: $country, platformCode: $platform, token: $token }
+    contentId: $contentId
+    isDetail: false
+  ) @skip(if: $skipCddsQuery) {
+    watchProgress {
+      contentId
+      resumeAt
+      watchRatio
+      watchState
+      watchTag
+      lastUpdated
+      duration
+    }
+    contentMeta {
+      ... on CollectionItem {
+        id
+        channelName
+        showID
+        parentInfo {
+          contentId
+          isPaid
+          title
+        }
+        year
+        showSeasonCount
+        duration
+        isLive
+        seasonName
+        displayTag
+      }
+      ... on ShowMeta {
+        id
+        channelName
+      }
+      ... on MovieMeta {
+        id
+        crispRatingInfo
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+      }
+      ... on EpisodeMeta {
+        id
+        showId
+        seasonEpisode
+        crispRatingInfo
+        seasonNumber
+        seasonId
+        episodeNumber
+        showTitle
+        broadcastDate
+        paywallTS
+        showType
+        channelName
+        enrichedMeta {
+          metaValues
+          metaType
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+        playMeta {
+          languageSelector
+          contentStartPointSeconds
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        showImages {
+          imageMasthead {
+            url
+          }
+          verticalImage {
+            url
+          }
+          horizontalImage {
+            url
+            height
+            width
+          }
+        }
+      }
+      ... on ClipMeta {
+        id
+        crispRatingInfo
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+      }
+      ... on SportsMeta {
+        id
+        broadcastDate
+        sportsInfo {
+          isHighlight
+          isLive
+          isReplay
+          matchID
+          sportsType
+          tournamentSeasonId
+          tournamentSeasonName
+          sportsTournamentId
+        }
+        playMeta {
+          languageSelector
+          audioFeatures {
+            code
+            label
+          }
+          duration
+          videoFeatures {
+            dynamicRanges {
+              code
+              label
+            }
+            resolution {
+              code
+              label
+            }
+          }
+          encrypted
+        }
+        subtitleLanguages {
+          code
+          displayName
+          name
+        }
+      }
+      coreAttributes {
+        contentId
+        isCreatorContent
+        ageRating
+        contentType
+        description
+        title
+        engTitle
+        studioName
+        languages {
+          code
+          displayName
+        }
+        originalLanguage {
+          code
+          displayName
+        }
+        entityType
+        clipType
+        genres
+        isPaid
+        isLive
+        lifeCycleStage
+        contentProvider
+        images {
+          horizontalImage {
+            url
+            height
+            width
+          }
+          verticalImage {
+            url
+            height
+            width
+          }
+          backgroundImage {
+            url
+          }
+          imageMasthead {
+            url
+          }
+          titleImage {
+            url
+          }
+        }
+        isMonetisable
+        studioId
+        videoMetaTimelines {
+          endTimeMs
+          startTimeMs
+          elementType
+        }
+        trailers
+        startDate
+        autoplayContentId
+      }
+    }
+    contentRating @include(if: $fetchCr) {
+      ratingList {
+        key
+      }
+      selectedRating {
+        key
+      }
+    }
+  }
+  fetchInStreamVideoAd(videoAdRequestBody: { contentId: $contentId, adRequestBody: { placementId: PREROLL, targetingParams: { noAdsTags: $noAdsTags } }, playerContext: $playerContext, prerollReference: $prerollReference, contentLanguage: $language, streamMode: $mode, perPodEnabled: $perPodEnabled, prefetch: $prefetch, clientCapabilities: $clientCapabilities }) @include(if: $vodAdsEnabled) {
+    preroll {
+      payload
+      serverUrl
+      showPrerollAd
+      hasThirdPartyWrapper
+    }
+    midroll {
+      serverUrl
+      streamMeta {
+        __typename
+        ... on LiveStreamMeta {
+          ssaiTag
+          userSegment
+          language
+        }
+        ... on VodStreamMeta {
+          adCuePoint {
+            cuePoints
+          }
+        }
+      }
+      showMidrollAd
+      isBlazeV2Enabled
+      isPerPodApiEnabled
+    }
+    adsFreeNudge {
+      showAdsFreeNudge
+      redirectTo
+      packId
+    }
+    showPauseAds
+  }
+  fetchWatchNext(
+    contentId: $contentId
+    hsRequest: { countryCode: $country, token: $token, platformCode: $platform }
+  ) @skip(if: $skipWatchNextQuery) {
+    contentId
+    contentMeta {
+      __typename
+      coreAttributes {
+        contentId
+        ageRating
+        contentType
+        entityType
+        description
+        title
+        engTitle
+        studioName
+        isCreatorContent
+        languages {
+          code
+          displayName
+        }
+        originalLanguage {
+          code
+          displayName
+        }
+        clipType
+        genres
+        isPaid
+        lifeCycleStage
+        contentProvider
+        images {
+          horizontalImage {
+            url
+            height
+            width
+          }
+          verticalImage {
+            url
+            height
+            width
+          }
+          backgroundImage {
+            url
+          }
+          imageMasthead {
+            url
+          }
+        }
+        isMonetisable
+        studioId
+        videoMetaTimelines {
+          endTimeMs
+          startTimeMs
+          elementType
+        }
+        trailers
+        startDate
+        autoplayContentId
+      }
+      ... on EpisodeMeta {
+        id
+        showId
+        crispRatingInfo
+        seasonNumber
+        seasonId
+        seasonEpisode
+        episodeNumber
+        showTitle
+        broadcastDate
+        paywallTS
+        showType
+        channelName
+        enrichedMeta {
+          metaValues
+          metaType
+        }
+        showImages {
+          imageMasthead {
+            url
+          }
+          verticalImage {
+            url
+          }
+          horizontalImage {
+            url
+            height
+            width
+          }
+        }
+        subtitleLanguages {
+          name
+          displayName
+          code
+        }
+        playMeta {
+          duration
+        }
+      }
+    }
+  }
+  GetKeymomentCtx(req: { contentId: $contentId }) @skip(if: $skipConsumptionDDSQuery) {
+    code
+    msg
+    contentId
+    parentContentInfo {
+      title
+      contentType
+      contentId
+      live
+      siMatchId
+      sportType
+      tournamentId
+      tournamentName
+      cmsMatchId
+    }
+    keymomentCtx {
+      currentKeymoment {
+        feed_id
+        duration
+        associated_content_id
+        content_id
+        content_type
+        title
+        description
+        markin_time
+        markout_time
+        category
+        tournamentId
+        tournamentName
+        cmsMatchId
+        thumbnail_url
+        display_over
+        innings_no
+        commentary_title
+        tenants
+        active
+        keymoment_match_time
+      }
+      nextKeymoment {
+        feed_id
+        duration
+        associated_content_id
+        content_id
+        content_type
+        title
+        description
+        markin_time
+        markout_time
+        category
+        tournamentId
+        tournamentName
+        cmsMatchId
+        thumbnail_url
+        display_over
+        innings_no
+        commentary_title
+        tenants
+        active
+        keymoment_match_time
+      }
+    }
+  }
+  GetScorecard(req: { contentId: $sportsContentId }) @include(if: $ifFetchScorecard) {
+    code
+    msg
+    contentId
+    scorecard {
+      match_id
+      is_match_over
+      start_time
+      is_test_match
+      timestamp
+      score_summary {
+        teams {
+          name
+          long_name
+          abbreviation
+        }
+        team_score_summary
+      }
+      score_boards {
+        is_zero_state
+        team_name
+        inn_is_over
+        total {
+          score
+          overs
+          runs_rate
+        }
+      }
+    }
+  }
+  GetLiveChannel(req: { channelId: $channelId }) @include(if: $includeChannel) {
+    msg
+    code
+    data {
+      channel_id
+      content_id
+      now_playing
+      next_playing
+      rating {
+        title
+        sub_title
+      }
+    }
+  }
+}
+}
