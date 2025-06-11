@@ -31,7 +31,7 @@ function get_json() {
     description=`echo $data | jq -r '.data.fetchContentDetail.contentMeta.coreAttributes.description'`
     # echo "$i. HSTV, $title, $contentID, https://img1.hotstarext.com/image/upload/$uri"
     
-    res=`jq -n --arg content_id $contentID --arg uri "$uri" --arg channelName "$title" --arg channelDescription "$description" --arg channelID $channelID '{"id":$content_id,"ChannelImageURL":$uri,"channelNumber":$channelID,"channelDescription":$channelDescription,"channelName":$channelName}'`
+    res=`jq -n --arg content_id $contentID --arg uri "$uri" --arg channelName "$title" --arg channelDescription "$description" --argjson channelID $channelID '{"ChannelImageURL":$uri,"channelDescription":$channelDescription,"channelName":$channelName,"channelNumber":$channelID,"id":$content_id}'`
     echo $res
 }
 
