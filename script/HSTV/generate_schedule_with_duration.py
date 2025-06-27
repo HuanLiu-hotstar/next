@@ -5,6 +5,7 @@ import datetime
 import random
 import os
 from pathlib import Path
+import sys
 
 
 def generate_schedule_with_duration(input_file=None, output_file=None, date_str=None):
@@ -381,7 +382,9 @@ def main():
     # Get today's date
     today = datetime.datetime.now()
     today_str = today.strftime("%m-%d-%Y")
-    # time_str = "06-26-2025"
+    # today_str = "06-30-2025"
+    if len(sys.argv) > 1:
+        today_str = sys.argv[1]
     num_days = 1
 
     # Generate a combined schedule for the next 7 days
